@@ -166,7 +166,7 @@ class Transiever{
   private:
     uint8_t chipEnable;
     uint8_t chipSelect;
-    byte addresses[2];
+    byte *addresses[2];
     RF24 radio;
     
     unsigned long prevTimeRecieved = 0;
@@ -216,7 +216,7 @@ class Transiever{
         signalLost = true;
       }
       
-      static char *recieved_buf = '0';
+      static char *recieved_buf;
       
       while (radio.available()){
         prevTimeRecieved = millis();
