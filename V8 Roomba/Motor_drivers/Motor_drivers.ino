@@ -56,6 +56,7 @@ class Driver {
   private:
     Motor *rightMotor;
     Motor *leftMotor;
+
   public:
     Driver(Motor *rightMotor, Motor *leftMotor) {
       this->rightMotor = rightMotor;
@@ -113,140 +114,24 @@ class Driver {
     }
 };
 
-class Ultrasonic {
-  private:
-    uint8_t trigPin;
-    uint8_t echoPin_r;
-    uint8_t echoPin_l;
-    const float soundSpeed = 0.034;
-  public:
-    float distance_r, distance_l;
-  
-    Ultrasonic(uint8_t trigPin, uint8_t echoPin_r, uint8_t echoPin_l) {
-      this->trigPin = trigPin;
-      this->echoPin_r = echoPin_r;
-      this->echoPin_l = echoPin_l;
-
-      pinMode(trigPin, OUTPUT);
-      pinMode(echoPin_r, INPUT);
-      pinMode(echoPin_l, INPUT);
-
-      init();
-    }
-
-    void init() {
-      Serial.println("-----------------------------");
-      Serial.println("Ultrasonic Sensor Initialized");
-      Serial.println("Trig pin: pin" + String(trigPin));
-      Serial.println("Right echo pin: pin" + String(echoPin_r));
-      Serial.println("Left echo pin: pin" + String(echoPin_l));
-      Serial.println("-----------------------------");
-    }
-
-    void measure() {
-      digitalWrite(trigPin, LOW);
-      delayMicroseconds(2);
-      digitalWrite(trigPin, HIGH);
-      delayMicroseconds(10);
-      digitalWrite(trigPin, LOW);
-      
-      this->distance_r = pulseIn(echoPin_r, HIGH) * soundSpeed / 2;
-      this->distance_l = pulseIn(echoPin_l, HIGH) * soundSpeed / 2;
-
-      displayDist();
-    }
-
-    void displayDist() {
-      Serial.println("#dr" + String(distance_r) + "#");
-      Serial.println("#dl" + String(distance_l) + "#");
-    }
-};
-
-class Transiever{
-  private:
-    uint8_t chipEnable;
-    uint8_t chipSelect;
-    byte *addresses[2];
-    RF24 radio;
-    
-    unsigned long prevTimeRecieved = 0;
-  public:    
-    boolean signalLost = false;
-    
-    Transiever(uint8_t chipEnable, uint8_t chipSelect, byte address_tx[6], byte address_rx[6]){
-      this->chipEnable = chipEnable;
-      this->chipSelect = chipSelect;
-      this->addresses[0] = address_tx;
-      this->addresses[1] = address_rx;
-      
-      init();
-    }
-
-    void init(){
-      RF24 radio(chipEnable, chipSelect);
-      this->radio = radio;
-
-      radio.begin();
-      radio.setDataRate(RF24_2MBPS);
-
-      radio.openWritingPipe(addresses[0]);
-      radio.openReadingPipe(0, addresses[1]);
-
-      radio.startListening();
-    }
-
-    void transmit(char *transmit_buf){
-      delay(1);
-      radio.stopListening();
-      
-      radio.write(transmit_buf, sizeof(transmit_buf));
-
-      Serial.print("Transmitted: ");
-      displayData(transmit_buf);
-      
-      delay(1);
-      radio.startListening();
-    }
-    
-    char *checkRecieved(){
-      unsigned long currentTime = millis();
-
-      // 1 second timeout
-      if (currentTime - prevTimeRecieved > 1000){
-        signalLost = true;
-      }
-      
-      static char *recieved_buf;
-      
-      while (radio.available()){
-        prevTimeRecieved = millis();
-        
-        signalLost = false;
-        
-        recieved_buf = recieve();        
-      }
-      return recieved_buf;
-    }
-    
-    char *recieve(){
-      static char recieve_buf[32] = {0};
-      radio.read(recieve_buf, sizeof(recieve_buf));
-
-      Serial.print("Recieved: ");
-      displayData(recieve_buf);
-
-      return recieve_buf;      
-    }
-
-    void displayData(char *text_buf){
-      Serial.println(text_buf);
-    }
-};
 
 void setup() {
-  
+  Serial.begin(9600);
 }
 
-void loop() {
 
+Motor rightMotor = Motor(3,5);
+Motor leftMotor = Motor(6,9);
+
+Driver botDriver = Driver(&rightMotor, &leftMotor);
+
+void loop() {
+  botDriver.forward(1,1);
+  delay(1000);
+  botDriver.backward(1,1);
+  delay(1000);
+  botDriver.forward(0.25, 0.25);
+  delay(1000);
+  botDriver.backward(0.25, 0.25);
+  delay(1000);
 }
