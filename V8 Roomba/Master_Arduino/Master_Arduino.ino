@@ -107,6 +107,8 @@ bool listening = true;
 
 char toSendPackage[32] = {0};
 
+bool docking = False;
+
 void loop() {
   if (millis() - setupTimer > 2000) {
     setupTimer = millis();
@@ -121,7 +123,7 @@ void loop() {
     radioFailed = false;
   }
 
-  if (listening)
+  if (listening && docking)
   {
     radio.startListening();
 
@@ -152,6 +154,10 @@ void loop() {
           case 'A':
             motorController.spinLeft(leftMotorSpeed, rightMotorSpeed);
             break;
+          
+          case 'G':
+            motorController.halt(leftMotorSpeed, rightMotorSpeed);
+            break;
 
           case 'Q':
             leftMotorSpeed += 20;
@@ -175,7 +181,7 @@ void loop() {
       }
     }
   }
-  else
+  else if (docking)
   {
     radio.stopListening();
 
@@ -183,6 +189,9 @@ void loop() {
       Serial.println("Attempting to send package to the dock");
     }
     listening = true;
+  }
+  else{
+    // code for autonomous control
   }
 
 }
