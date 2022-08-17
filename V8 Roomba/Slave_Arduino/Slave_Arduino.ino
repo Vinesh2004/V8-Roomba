@@ -128,7 +128,7 @@ Motor leftMotor = Motor(6, 9);
 Driver motorDriver = Driver(&rightMotor, &leftMotor);
 
 void loop(){
-  delay(100);
+  delay(1);
 }
 
 void recievedData(int numBytes) {
