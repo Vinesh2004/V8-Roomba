@@ -123,7 +123,7 @@ class Ultrasonic {
   public:
     float distance_r, distance_l;
   
-    Ultrasonic(uint8_t trigPin_r, uint8_t echoPin_r, uint8_t echoPin_r, uint8_t echoPin_l) {
+    Ultrasonic(uint8_t trigPin_r, uint8_t trigPin_l, uint8_t echoPin_r, uint8_t echoPin_l) {
       this->trigPin_r = trigPin_r;
       this->trigPin_l = trigPin_l;
       this->echoPin_r = echoPin_r;
