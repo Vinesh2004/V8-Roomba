@@ -116,7 +116,7 @@ class Driver {
 class Ultrasonic {
   private:
     uint8_t trigPin_r;
-    uint8_t trigPin_l
+    uint8_t trigPin_l;
     uint8_t echoPin_r;
     uint8_t echoPin_l;
     const float soundSpeed = 0.034;
