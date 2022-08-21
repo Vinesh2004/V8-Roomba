@@ -144,8 +144,8 @@ void setup() {
 
 Driver motorController = Driver(0x4);
 
-float rightMotorSpeed = 0.5;
-float leftMotorSpeed = 0.5;
+float rightMotorSpeed = 128;
+float leftMotorSpeed = 128;
 
 bool radioFailed = false;
 uint32_t setupTimer = millis();
@@ -207,19 +207,19 @@ void loop() {
             break;
 
           case 'Q':
-            leftMotorSpeed += 0.1;
+            leftMotorSpeed += 20;
             break;
 
           case 'Z':
-            leftMotorSpeed -= 0.1;
+            leftMotorSpeed -= 20;
             break;
   
           case 'E':
-            rightMotorSpeed += 0.1;
+            rightMotorSpeed += 20;
             break;
 
           case 'C':
-            rightMotorSpeed -= 0.1;
+            rightMotorSpeed -= 20;
             break;
           
           default:
