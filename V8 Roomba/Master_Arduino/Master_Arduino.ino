@@ -149,8 +149,8 @@ Driver motorController = Driver(0x4);
 Ultrasonic ultrasonicController = Ultrasonic(4,5,6,7);
 
 
-float rightMotorSpeed = 128;
-float leftMotorSpeed = 128;
+float rightMotorSpeed = 0.5;
+float leftMotorSpeed = 0.5;
 
 bool radioFailed = false;
 uint32_t setupTimer = millis();
@@ -215,19 +215,19 @@ void loop() {
             break;
 
           case 'Q':
-            leftMotorSpeed += 20;
+            leftMotorSpeed += 0.1;
             break;
 
           case 'Z':
-            leftMotorSpeed -= 20;
+            leftMotorSpeed -= 0.1;
             break;
   
           case 'E':
-            rightMotorSpeed += 20;
+            rightMotorSpeed += 0.1;
             break;
 
           case 'C':
-            rightMotorSpeed -= 20;
+            rightMotorSpeed -= 0.1;
             break;
           
           default:
