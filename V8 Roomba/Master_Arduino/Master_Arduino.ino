@@ -77,14 +77,14 @@ class Driver {
 class Ultrasonic {
   private:
     uint8_t trigPin_r;
-    uint8_t trigPin_l
+    uint8_t trigPin_l;
     uint8_t echoPin_r;
     uint8_t echoPin_l;
     const float soundSpeed = 0.034;
   public:
     float distance_r, distance_l;
   
-    Ultrasonic(uint8_t trigPin_r, uint8_t echoPin_r, uint8_t echoPin_r, uint8_t echoPin_l) {
+    Ultrasonic(uint8_t trigPin_r, uint8_t echoPin_r, uint8_t trigPin_l, uint8_t echoPin_l) {
       this->trigPin_r = trigPin_r;
       this->trigPin_l = trigPin_l;
       this->echoPin_r = echoPin_r;
@@ -119,6 +119,8 @@ class Ultrasonic {
       Serial.println("#dr" + String(distance_r) + "#");
       Serial.println("#dl" + String(distance_l) + "#");
     }
+
+    void backwards()
 };
 
 uint8_t masterAddress = 0x00;
@@ -144,6 +146,9 @@ void setup() {
 
 Driver motorController = Driver(0x4);
 
+Ultrasonic ultrasonicController = Ultrasonic(4,5,6,7);
+
+
 float rightMotorSpeed = 128;
 float leftMotorSpeed = 128;
 
@@ -157,6 +162,9 @@ char toSendPackage[32] = {0};
 bool docking = False;
 
 void loop() {
+  ultrasonicController.measure();
+  float leftDist = ultrasonicController.distance_l;
+  float rightDist = ultrasonicController.distance_r;
   if (millis() - setupTimer > 2000) {
     setupTimer = millis();
     if (radio.getDataRate() != RF24_1MBPS) {
@@ -238,7 +246,10 @@ void loop() {
     listening = true;
   }
   else{
-    // code for autonomous control
+    if (ultrasonicController.distance_r <10 || ultrasonicController.distance_l <10){
+      motorController.backward(leftSpeed, rightSpeed);
+    }
+    
   }
 
 }
