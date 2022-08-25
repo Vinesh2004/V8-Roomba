@@ -148,6 +148,7 @@ Driver motorController = Driver(0x4);
 
 Ultrasonic ultrasonicController = Ultrasonic(4,5,6,7);
 
+float USRightSpinDuration = 1250;
 
 float rightMotorSpeed = 0.5;
 float leftMotorSpeed = 0.5;
@@ -247,9 +248,28 @@ void loop() {
   }
   else{
     if (ultrasonicController.distance_r <10 || ultrasonicController.distance_l <10){
-      motorController.backward(leftSpeed, rightSpeed);
+      leftMotorSpeed = 0.75;
+      rightMotorSpeed = 0.75;
+      motorController.backward(leftMotorSpeed, rightMotorSpeed);
+      delay(1200);
+      leftMotorSpeed = 0.75;
+      rightMotorSpeed = 0.75;
+      spinRight(leftMotorSpeed, rightMotorSpeed);
+      delay(USRightSpinDuration);
+      leftMotorSpeed = 0.5;
+      rightMotorSpeed = 0.5;
+      forward(leftMotorSpeed, rightMotorSpeed);
+      delay(1500);
+      leftMotorSpeed = 0.75;
+      rightMotorSpeed = 0.75;
+      spinRight(leftMotorSpeed, rightMotorSpeed);
+      delay(USRightSpinDuration);
     }
-    
+    else{
+      leftMotorSpeed = 0.5;
+      rightMotorSpeed = 0.5;
+      forward(leftMotorSpeed, rightMotorSpeed);
+    }
   }
 
 }
