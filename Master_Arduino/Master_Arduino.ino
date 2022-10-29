@@ -42,22 +42,22 @@ class Driver {
     }
 
     void forward(float leftS, float rightS) {
-      byte leftSpeed = round(leftS * 255);
-      byte rightSpeed = round(rightS * 255);
+      byte leftSpeed = round(leftS);
+      byte rightSpeed = round(rightS);
 
       sendCommand(1, leftSpeed, 1, rightSpeed);
     }
 
     void backward(float leftS, float rightS) {
-      byte leftSpeed = round(leftS * 255);
-      byte rightSpeed = round(rightS * 255);
+      byte leftSpeed = round(leftS);
+      byte rightSpeed = round(rightS);
 
       sendCommand(0, leftSpeed, 0, rightSpeed);
     }
 
     void spinRight(float leftS, float rightS) {
-      byte leftSpeed = round(leftS * 255);
-      byte rightSpeed = round(rightS * 255);
+      byte leftSpeed = round(leftS);
+      byte rightSpeed = round(rightS);
 
       sendCommand(1, leftSpeed, 0, rightSpeed);
     }
@@ -74,55 +74,6 @@ class Driver {
     }
 };
 
-class Ultrasonic {
-  private:
-    uint8_t trigPin_r;
-    uint8_t trigPin_l;
-    uint8_t echoPin_r;
-    uint8_t echoPin_l;
-    const float soundSpeed = 0.034;
-  public:
-    float distance_r, distance_l;
-  
-    Ultrasonic(uint8_t trigPin_r, uint8_t echoPin_r, uint8_t trigPin_l, uint8_t echoPin_l) {
-      this->trigPin_r = trigPin_r;
-      this->trigPin_l = trigPin_l;
-      this->echoPin_r = echoPin_r;
-      this->echoPin_l = echoPin_l;
-
-      pinMode(trigPin_r, OUTPUT);
-      pinMode(trigPin_l, OUTPUT);
-      pinMode(echoPin_r, INPUT);
-      pinMode(echoPin_l, INPUT);
-    }
-
-    void measure() {
-      digitalWrite(trigPin_l, LOW);
-      delayMicroseconds(2);
-      digitalWrite(trigPin_l, HIGH);
-      delayMicroseconds(10);
-      digitalWrite(trigPin_l, LOW);
-      
-      this->distance_r = pulseIn(echoPin_l, HIGH) * soundSpeed / 2;
-      
-      digitalWrite(trigPin_r, LOW);
-      delayMicroseconds(2);
-      digitalWrite(trigPin_r, HIGH);
-      delayMicroseconds(10);
-      digitalWrite(trigPin_r, LOW);
-      this->distance_l = pulseIn(echoPin_r, HIGH) * soundSpeed / 2;
-
-      displayDist();
-    }
-
-    void displayDist() {
-      Serial.println("#dr" + String(distance_r) + "#");
-      Serial.println("#dl" + String(distance_l) + "#");
-    }
-
-    void backwards()
-};
-
 uint8_t masterAddress = 0x00;
 
 RF24 radio(9, 8);
@@ -133,7 +84,7 @@ void radioSetup() {
   radio.begin();
 
   radio.openReadingPipe(0, rx_address);
-  radio.openWritingPipe(tx_address);
+  //radio.openWritingPipe(tx_address);
 
   radio.startListening();
 }
@@ -146,12 +97,8 @@ void setup() {
 
 Driver motorController = Driver(0x4);
 
-Ultrasonic ultrasonicController = Ultrasonic(4,5,6,7);
-
-float USRightSpinDuration = 1250;
-
-float rightMotorSpeed = 0.5;
-float leftMotorSpeed = 0.5;
+float rightMotorSpeed = 255;
+float leftMotorSpeed = 255;
 
 bool radioFailed = false;
 uint32_t setupTimer = millis();
@@ -160,12 +107,7 @@ bool listening = true;
 
 char toSendPackage[32] = {0};
 
-bool docking = False;
-
 void loop() {
-  ultrasonicController.measure();
-  float leftDist = ultrasonicController.distance_l;
-  float rightDist = ultrasonicController.distance_r;
   if (millis() - setupTimer > 2000) {
     setupTimer = millis();
     if (radio.getDataRate() != RF24_1MBPS) {
@@ -179,7 +121,7 @@ void loop() {
     radioFailed = false;
   }
 
-  if (listening && docking)
+  if (listening)
   {
     radio.startListening();
 
@@ -210,25 +152,21 @@ void loop() {
           case 'A':
             motorController.spinLeft(leftMotorSpeed, rightMotorSpeed);
             break;
-          
-          case 'G':
-            motorController.halt(leftMotorSpeed, rightMotorSpeed);
-            break;
 
           case 'Q':
-            leftMotorSpeed += 0.1;
+            leftMotorSpeed += 20;
             break;
 
           case 'Z':
-            leftMotorSpeed -= 0.1;
+            leftMotorSpeed -= 20;
             break;
   
           case 'E':
-            rightMotorSpeed += 0.1;
+            rightMotorSpeed += 20;
             break;
 
           case 'C':
-            rightMotorSpeed -= 0.1;
+            rightMotorSpeed -= 20;
             break;
           
           default:
@@ -237,7 +175,7 @@ void loop() {
       }
     }
   }
-  else if (docking)
+  else
   {
     radio.stopListening();
 
@@ -245,31 +183,6 @@ void loop() {
       Serial.println("Attempting to send package to the dock");
     }
     listening = true;
-  }
-  else{
-    if (ultrasonicController.distance_r <10 || ultrasonicController.distance_l <10){
-      leftMotorSpeed = 0.75;
-      rightMotorSpeed = 0.75;
-      motorController.backward(leftMotorSpeed, rightMotorSpeed);
-      delay(1200);
-      leftMotorSpeed = 0.75;
-      rightMotorSpeed = 0.75;
-      spinRight(leftMotorSpeed, rightMotorSpeed);
-      delay(USRightSpinDuration);
-      leftMotorSpeed = 0.5;
-      rightMotorSpeed = 0.5;
-      forward(leftMotorSpeed, rightMotorSpeed);
-      delay(1500);
-      leftMotorSpeed = 0.75;
-      rightMotorSpeed = 0.75;
-      spinRight(leftMotorSpeed, rightMotorSpeed);
-      delay(USRightSpinDuration);
-    }
-    else{
-      leftMotorSpeed = 0.5;
-      rightMotorSpeed = 0.5;
-      forward(leftMotorSpeed, rightMotorSpeed);
-    }
   }
 
 }

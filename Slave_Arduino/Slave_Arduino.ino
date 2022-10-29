@@ -27,19 +27,19 @@ class Motor {
     }
 
     void forward(float speedPercentage) {
-      float pwmOut = speedPercentage * 255;
+      int pwmOut = speedPercentage;
 
       digitalWrite(forwardPin, pwmOut);
-      digitalWrite(backwardPin, LOW);
+      digitalWrite(backwardPin, 0);
 
       Serial.println("f" + String(speedPercentage) + "#");
     }
 
     void backward(float speedPercentage) {
-      float pwmOut = speedPercentage * 255;
+      int pwmOut = speedPercentage;
 
       digitalWrite(backwardPin, pwmOut);
-      digitalWrite(forwardPin, LOW);
+      digitalWrite(forwardPin, 0);
 
       Serial.println("b" + String(speedPercentage) + "#");
     }

@@ -64,7 +64,7 @@ void loop(){
     radio.stopListening();
     
     if (!radio.write(&toSendPackage, sizeof(toSendPackage))) {
-      Serial.println("Attempting to send package to the dock");
+      Serial.println("Attempting to send package to the bot");
     }
   }
 
