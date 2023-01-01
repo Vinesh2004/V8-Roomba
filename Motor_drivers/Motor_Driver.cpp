@@ -35,6 +35,7 @@ void Motor::halt(int timeMsec)
 {
     int tempMotorPow = (*this).motorPow;
     (*this).halt();
+    delay(timeMsec);
     (*this).drive(tempMotorPow);
 }
 
@@ -99,16 +100,60 @@ void Motor_Driver::drive(int motorPow)
 
 void Motor_Driver::spin(int motorPow);
 {
-    for (int col = 0; col < MOTOR_ROWS; col ++)
+    for (int row = 0; row < MOTOR_ROWS; row ++)
     {
-        motor[0][col] = motorPow;
-        motor[1][col] = -motorPow;
+        motor[row][0].drive(motorPow);
+        motor[row][1].drive(-motorPow);
     }
 }
-void Motor_Driver::spin(int motorPow, int angle);
+void Motor_Driver::spin(int motorPow, int angle)
+{
+    // not implemented; needs a gyro sensor or some method of determining angle.
+    return;
+}
 
-void Motor_Driver::turn(int motorPow, int turiningRadius, int angle);
-void Motor_Driver::turn(int motorPow, int turningRadius);
 
-void Motor_Driver::stop();
-void Motor_Driver::stop(int timeMsec); 
+void Motor_Driver::turn(int motorPow, int turningRadius)
+{
+    // turning radius is expressed in length relative to the length of
+    // the roomba where the roomba's length is represent with a value of 1
+    const vehicleLength = 1;
+
+    int rightSide = motorPow * (turningRadius/abs(turningRadius));
+
+    int leftSide = rightSide / (1 + vehicleLength/abs(turningRadius));
+    leftSide *=  (turningRadius/abs(turningRadius));
+
+    for (int row = 0; row < MOTOR_ROWS; row++)
+    {
+        motor[row][0].drive(leftSide);
+        motor[row][1].drive(rightSide);
+    }
+}
+
+void Motor_Driver::turn(int motorPow, int turiningRadius, int angle)
+{
+    // not implemented; needs a gyro sensor or some method of determining angle.
+    return;
+}
+
+void Motor_Driver::stop()
+{
+    for (int row = 0; row < MOTOR_ROWS; rows++)
+    {
+        for (int col = 0; col < MOTOR_COLS; col++)
+        {
+            motor[row][col].halt();
+        }
+    }
+}
+void Motor_Driver::stop(int timeMsec)
+{
+    for (int row = 0; row < MOTOR_ROWS; rows++)
+    {
+        for (int col = 0; col < MOTOR_COLS; col++)
+        {
+            motor[row][col].halt(timeMsec);
+        }
+    }
+}
