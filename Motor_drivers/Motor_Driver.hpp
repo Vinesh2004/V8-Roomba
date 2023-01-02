@@ -3,16 +3,15 @@
 
 #define MAX_POW 255
 
-#ifndef MOTOR_COLS
-#define MOTOR_COLS 2
+#ifndef MOTOR_ROWS
+#define MOTOR_ROWS 1
 #endif
 
-#define MOTOR_ROWS 2
+#define MOTOR_COLS 2
 
 #define NUM_MOTOR_PINS 2
 
 #include "Arduino.h"
-#include <cmath>
 
 /**
  * @brief Motor structure definition.
@@ -26,33 +25,35 @@ class Motor
         int motorPow;
     public:
         Motor(int foward_in, int backward_in);
+        Motor();
         void drive();
         void drive(int motorPow_in);
         void halt();
         void halt(int timeMsec);
-}
+};
 
 class Motor_Driver
 {
     private:
         Motor motor[MOTOR_ROWS][MOTOR_COLS];
-        bool omniDrive;
+        bool omniDriveVal;
     public:
         Motor_Driver(int motorPins_in[MOTOR_ROWS][MOTOR_COLS][NUM_MOTOR_PINS],
-                     bool omniDrive_in = false);
+                     bool omniDrive_in);
+        Motor_Driver();
         
-        void omniDrive(int angle, int motorPow);
+        void omniDrive(float angle, int motorPow);
 
         void drive(int motorPow);
 
         void spin(int motorPow);
         void spin(int motorPow, int angle);
 
-        void turn(int motorPow, int turiningRadius, int angle);
-        void turn(int motorPow, int turningRadius);
+        void turn(int motorPow, float turiningRadius, int angle);
+        void turn(int motorPow, float turningRadius);
 
         void stop();
         void stop(int timeMsec); 
-}
+};
 
-#endif MOTOR_DRIVER_H
+#endif
