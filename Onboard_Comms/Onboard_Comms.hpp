@@ -16,11 +16,12 @@
 #define FORWARD 9
 #define BACKWARD 10
 
-#define MASTER_ADDR = 0x01
-#define SLAVE_ADDR = 0x02
+#define MASTER_ADDR 0x01
+#define SLAVE_ADDR 0x02
 
 #include "Arduino.h"
-#include "../Motor_Drivers/Motor_Driver.hpp"
+#include <Wire.h>
+#include "Motor_Driver.hpp"
 
 class CommsOut
 {
@@ -34,11 +35,11 @@ class CommsOut
 
     public:
         CommsOut();
-        commsOut(uint8_t address_in);
+        CommsOut(uint8_t address_in);
 
         void startUp();
 
-        void changeState(int state);
+        void changeState(uint8_t state);
 
         void omniDrive(int angleDeg, int motorPow);
 

@@ -6,7 +6,7 @@
 void CommsOut::sendCommand()
 {
     Wire.beginTransmission((*this).address);
-    Wire.write((*this).state);
+    Wire.write((*this).currentState);
 
     Wire.endTransmission();
 }
@@ -14,7 +14,7 @@ void CommsOut::sendCommand()
 void CommsOut::sendCommand(uint8_t direction, uint8_t motorPow)
 {
     Wire.beginTransmission((*this).address);
-    Wire.write((*this).state);
+    Wire.write((*this).currentState);
 
     Wire.write(direction);
     Wire.write(motorPow);
@@ -25,7 +25,7 @@ void CommsOut::sendCommand(uint8_t direction, uint8_t motorPow)
 void CommsOut::sendCommand(uint8_t direction, uint8_t motorPow, uint8_t angleDeg)
 {
     Wire.beginTransmission((*this).address);
-    Wire.write((*this).state);
+    Wire.write((*this).currentState);
 
     Wire.write(direction);
     Wire.write(motorPow);
@@ -37,19 +37,20 @@ void CommsOut::sendCommand(uint8_t direction, uint8_t motorPow, uint8_t angleDeg
 /* Public */
 CommsOut::CommsOut()
 {
-    address = MASTER_ADDR;
-    startUp();
+    (*this).address = SLAVE_ADDR;
+    //startUp();
 }
 
-CommsOut::commsOut(uint8_t address_in)
+CommsOut::CommsOut(uint8_t address_in)
 {
-    address = address_in;
+    (*this).address = address_in;
     startUp();
 }
 
 void CommsOut::startUp()
 {
-    (*this).currentState = STATE_STARTUP;
+    (*this).currentState = STARTUP;
+    Wire.begin((*this).address);
     sendCommand();
 }
 
@@ -149,14 +150,24 @@ CommsIn::CommsIn(uint8_t address_in, Motor_Driver driver_in)
     (*this).address = address_in;
     (*this).currentState = STANDBY;
     (*this).driver = driver_in;
+
+    Wire.begin((*this).address);
 }
 
-CommsIn::void commsRecieved(int numBytes)
+void CommsIn::commsRecieved(int numBytes)
 {
-    while(commsAvail())
+    while((*this).commsAvail())
     {
         byte state = Wire.read();
         (*this).currentState = state;
+        
+        uint8_t direction;
+        int motorPow;
+
+        int angleDeg;
+        float angle;
+        int turnRad;
+        float turningRadius;
         
         switch(state)
         {
@@ -169,8 +180,8 @@ CommsIn::void commsRecieved(int numBytes)
                 break;
             
             case DRIVE:
-                uint8_t direction = Wire.read();
-                int motorPow = Wire.read();
+                direction = Wire.read();
+                motorPow = Wire.read();
 
                 if (direction != FORWARD)
                 {
@@ -182,49 +193,53 @@ CommsIn::void commsRecieved(int numBytes)
                 break;
             
             case OMNI_DRIVE:
-                uint8_t direction = Wire.read();
-                int motorPow = Wire.read();
+                direction = Wire.read();
+                motorPow = Wire.read();
 
                 if (direction != FORWARD)
                 {
                     motorPow *= -1;
                 }
 
-                int angleDeg = Wire.read();
-                float angle = angleDeg * PI/180;
+                angleDeg = Wire.read();
+                angle = angleDeg * PI/180;
 
                 (*this).driver.omniDrive(angle, motorPow);
 
                 break;
             
-            case SPIN_DRIVE || SPIN_DRIVE_ANG:
-                uint8_t direction = Wire.read();
-                int motorPow = Wire.read();
+            case SPIN_DRIVE:
+                direction = Wire.read();
+                motorPow = Wire.read();
 
                 if (direction != FORWARD)
                     motorPow *= -1;
+              
+                (*this).driver.spin(motorPow);
                 
-                if (state == SPIN_DRIVE_ANG)
-                {
-                    int angleDeg = Wire.read();
-                    (*this).driver.spin(motorPow, angleDeg);
-                }
-                else
-                {
-                    (*this).driver.spin(motorPow);
-                }
-
                 break;
-            
-            case TURN_DRIVE:
-                uint8_t direction = Wire.read();
-                int motorPow = Wire.read();
+
+            case SPIN_DRIVE_ANG:
+                direction = Wire.read();
+                motorPow = Wire.read();
 
                 if (direction != FORWARD)
                     motorPow *= -1;
                 
-                int turnRad = Wire.read();
-                float turningRadius = turnRad / 10;
+                angleDeg = Wire.read();
+                (*this).driver.spin(motorPow, angleDeg);
+                
+                break;
+                
+            case TURN_DRIVE:
+                direction = Wire.read();
+                motorPow = Wire.read();
+
+                if (direction != FORWARD)
+                    motorPow *= -1;
+                
+                turnRad = Wire.read();
+                turningRadius = turnRad / 10;
 
                 (*this).driver.turn(motorPow, turningRadius);
 

@@ -4,7 +4,7 @@
 #define MAX_POW 255
 
 #ifndef MOTOR_ROWS
-#define MOTOR_ROWS 1
+#define MOTOR_ROWS 2
 #endif
 
 #define MOTOR_COLS 2
